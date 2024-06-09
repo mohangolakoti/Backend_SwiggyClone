@@ -7,10 +7,12 @@ const bodyParser = require('body-parser');
 const firmRoutes = require('./routes/firmRoutes');
 const productRoutes = require("./routes/productRoutes");
 const path =require('path');
+const cors = require('cors')
 
 app.use(bodyParser.json());
 
 dotEnv.config();
+app.use(cors());
 const port = process.env.PORT || 4000;
 
 mongoose.connect(process.env.MONGO_URL).then(()=>console.log("Mogo connected Sucessfully")).catch((error)=>console.log(error));
