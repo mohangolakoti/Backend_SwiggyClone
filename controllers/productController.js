@@ -2,6 +2,7 @@ const Firm = require('../models/Firm');
 const Product = require('../models/Product')
 const multer = require('multer')
 const path = require('path')
+const fs = require('fs')
 
 const storage = multer.diskStorage({
     destination:function(req,file,cb){
@@ -63,15 +64,39 @@ const getProductByFirm = async(req,res)=>{
 }
 
 const deleteProductById = async(req,res)=>{
-    try {
+    /* try {
         const productId = req.params.productId;
         const deletedProduct = await Product.findByIdAndDelete(productId);
         if(!deletedProduct){
             return res.status(404).json({error:"No product found"})
         }
+        res.status(200).json({ message: "Product deleted successfully" });
     } catch (error) {
         console.error(error);
         res.status(500).json({error:"Internal Server error"})
+    } */
+    try {
+        const productId = req.params.productId;
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ error: "No product found" });
+        }
+
+        // Delete the product from the database
+        const deletedProduct = await Product.findByIdAndDelete(productId);
+
+        // Delete the image file
+        const imagePath = path.join(__dirname, '../uploads', product.image); // Adjust if the image path is stored differently
+        fs.unlink(imagePath, (err) => {
+            if (err) {
+                console.error("Failed to delete the image file", err);
+            }
+        });
+
+        res.status(200).json({ message: "Product deleted successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server error" });
     }
 }
  

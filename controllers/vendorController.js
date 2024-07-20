@@ -2,6 +2,7 @@ const Vendor= require('../models/Vendor');
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const dotEnv = require('dotenv')
+const Firm = require('../models/Firm')
 
 dotEnv.config();
 const secretKey = process.env.WhoAreYou
@@ -41,10 +42,16 @@ const vendorLogin = async(req,res)=>{
         }
 
         const token = jwt.sign({vendorId:vendor._id},secretKey, {expiresIn:"1h"})
-
-
-        res.status(200).json({success: "Login successful",token})
-        console.log(email, "token is", token);
+        if(vendor.firm[0]){
+            const firmId = vendor.firm[0]._id
+            const firm = await Firm.findById(firmId)
+            const firmName = firm.firmName
+            res.status(200).json({success: "Login successful",token,firmId,firmName})
+            console.log(email, "token is", token , "FirmId is", firmId, "firmName is", firmName);
+        }else{
+            res.status(200).json({success: "Login successful",token})
+            console.log(email, "token is", token);
+        }
     }
         catch(error){
             console.log(error)
@@ -65,14 +72,16 @@ const getAllVendors = async(req,res)=>{
 const getVendorById = async(req,res)=>{
     const vendorId=req.params.id;
     try {
-        const vendor =await Vendor.findById(vendorId).populate('firm');
-        if(!vendor){
-            return res.status(404).json({error:"Vendor not found"})
+        const vendor = await Vendor.findById(vendorId).populate('firm');
+        if (!vendor) {
+            return res.status(404).json({ error: "Vendor not found" })
         }
-        res.status(200).json({vendor})
+        const vendorFirmId = vendor.firm[0]._id;
+        res.status(200).json({ vendorId, vendorFirmId, vendor })
+        console.log(vendorFirmId);
     } catch (error) {
-        console.log(error)
-        res.status(500).json({error:"Internal server error"})
+        console.log(error);
+        res.status(500).json({ error: "Internal server error" });
     }
 }
 
