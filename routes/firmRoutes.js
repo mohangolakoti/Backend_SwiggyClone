@@ -10,6 +10,7 @@ router.get('/uploads/:imageName',(req,res)=>{
     res.headerSent('Content-Type', 'image/jpeg');
     res.sendFile(path.join(__dirname, '..' ,'uploads', imageName));
 });
+router.get('/getFirm/:firmId',firmController.getFirmById);
 router.delete('/:firmId', firmController.deleteFirmById);
 
 module.exports = router

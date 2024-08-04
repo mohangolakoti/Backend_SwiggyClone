@@ -60,4 +60,21 @@ const deleteFirmById = async(req,res)=>{
     }
 }
 
-module.exports = {addFirm:[upload.single('image'), addFirm], deleteFirmById}
+const getFirmById = async(req,res)=>{
+    try {
+        const firmId = req.params.firmId;
+        const firm =await Firm.findById(firmId).populate();
+
+        if(!firm){
+            return res.status(404).json({message:"Firm not Found"})
+        }
+
+        res.json({firm})
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({error:"Internal server error"});
+    }
+}
+
+module.exports = {addFirm:[upload.single('image'), addFirm], deleteFirmById, getFirmById}
